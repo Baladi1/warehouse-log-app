@@ -1,0 +1,988 @@
+﻿<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>יומן ניטור מחסנים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
+body{
+  background:var(--bg);
+  color:var(--text-primary);
+  font-family:'Heebo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+:root{
+  --bg:#f9f9f7;
+  --surface:#ffffff;
+  --surface-2:#f0efeb;
+  --surface-3:#e7e5df;
+  --text-primary:#14181b;
+  --text-secondary:#52514e;
+  --text-muted:#8b8a84;
+  --border:rgba(11,11,11,0.12);
+  --gridline:#e4e2db;
+  --accent:#0f7c82;
+  --accent-strong:#0b5d62;
+  --accent-soft:#e3f1f1;
+  --good:#0ca30c;
+  --warning:#a8690a;
+  --critical:#c0392b;
+  --series-1:#2a78d6;
+  --series-2:#eb6834;
+  --series-3:#1baf7a;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 1px 2px rgba(11,11,11,0.05), 0 6px 20px rgba(11,11,11,0.07);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e0f0d;
+    --surface:#1a1b19;
+    --surface-2:#222320;
+    --surface-3:#2b2c28;
+    --text-primary:#f3f2ee;
+    --text-secondary:#c3c2b7;
+    --text-muted:#8d8b84;
+    --border:rgba(255,255,255,0.14);
+    --gridline:#2e2f2b;
+    --accent:#39c3ca;
+    --accent-strong:#6cd7dc;
+    --accent-soft:rgba(57,195,202,0.14);
+    --good:#2fbf2f;
+    --warning:#e2a53a;
+    --critical:#e66c66;
+    --series-1:#3987e5;
+    --series-2:#d95926;
+    --series-3:#199e70;
+    --shadow:0 1px 2px rgba(0,0,0,0.4), 0 6px 24px rgba(0,0,0,0.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e0f0d;
+  --surface:#1a1b19;
+  --surface-2:#222320;
+  --surface-3:#2b2c28;
+  --text-primary:#f3f2ee;
+  --text-secondary:#c3c2b7;
+  --text-muted:#8d8b84;
+  --border:rgba(255,255,255,0.14);
+  --gridline:#2e2f2b;
+  --accent:#39c3ca;
+  --accent-strong:#6cd7dc;
+  --accent-soft:rgba(57,195,202,0.14);
+  --good:#2fbf2f;
+  --warning:#e2a53a;
+  --critical:#e66c66;
+  --series-1:#3987e5;
+  --series-2:#d95926;
+  --series-3:#199e70;
+  --shadow:0 1px 2px rgba(0,0,0,0.4), 0 6px 24px rgba(0,0,0,0.4);
+}
+h1,h2,h3{margin:0;text-wrap:balance;}
+p{margin:0;}
+button{font-family:inherit;}
+input,select{font-family:inherit;color:inherit;}
+::selection{background:var(--accent-soft);}
+a{color:var(--accent-strong);}
+
+.app-header{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);}
+.app-header-inner{max-width:960px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.app-title{font-size:16px;font-weight:800;letter-spacing:-0.01em;flex:none;}
+.app-title small{display:block;font-size:11px;font-weight:500;color:var(--text-muted);letter-spacing:0.02em;}
+.tabs{display:flex;gap:4px;background:var(--surface-2);border-radius:999px;padding:3px;margin-inline-start:auto;}
+.tab-btn{border:none;background:transparent;padding:7px 16px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--text-secondary);cursor:pointer;transition:background .15s,color .15s;}
+.tab-btn.active{background:var(--surface);color:var(--accent-strong);box-shadow:var(--shadow);}
+.tab-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+.user-chip{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary);background:var(--surface-2);border-radius:999px;padding:5px 10px 5px 6px;cursor:pointer;border:1px solid transparent;}
+.user-chip:hover{border-color:var(--border);}
+.user-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;}
+
+.container{max-width:640px;margin:0 auto;padding:18px 16px 90px;}
+.container.wide{max-width:960px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+.card + .card{margin-top:14px;}
+.section-stack > * + *{margin-top:14px;}
+
+.section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.section-title .unit{font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-muted);}
+
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12.5px;font-weight:600;color:var(--text-secondary);}
+.field input[type=text],.field input[type=date],.field select,.field input[type=password]{border:1px solid var(--border);background:var(--surface);color:var(--text-primary);border-radius:var(--radius-sm);padding:9px 11px;font-size:14.5px;width:100%;}
+.field input:focus-visible,.field select:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:480px){.field-row{grid-template-columns:1fr;}}
+
+.grid-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px;}
+.grid-table th{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.02em;padding:0 2px 8px;text-align:center;font-family:'Heebo',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.grid-table th:first-child{text-align:right;width:32%;}
+.grid-table td{padding:3px 2px;}
+.grid-table td:first-child{font-weight:700;font-size:11.5px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline-end:3px;width:32%;}
+.num-input{width:100%;min-width:0;border:1px solid var(--border);background:var(--surface-2);color:var(--text-primary);border-radius:var(--radius-sm);padding:8px 2px;font-size:13px;text-align:center;font-family:'Space Mono',monospace;direction:ltr;}
+.num-input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);background:var(--surface);}
+.flat-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
+.flat-field{display:flex;flex-direction:column;gap:5px;}
+.flat-field label{font-size:12.5px;font-weight:600;color:var(--text-secondary);}
+
+.btn{border:none;border-radius:999px;padding:11px 22px;font-size:14.5px;font-weight:700;cursor:pointer;transition:transform .1s,opacity .15s;display:inline-flex;align-items:center;gap:8px;justify-content:center;}
+.btn:active{transform:scale(0.98);}
+.btn:disabled{opacity:0.55;cursor:default;}
+.btn-primary{background:var(--accent);color:#fff;width:100%;}
+.btn-primary:hover:not(:disabled){background:var(--accent-strong);}
+.btn-secondary{background:var(--surface-2);color:var(--text-primary);}
+.btn-ghost{background:transparent;color:var(--accent-strong);padding:8px 12px;}
+.btn-block{width:100%;}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+.banner{background:var(--accent-soft);border:1px solid var(--accent);color:var(--text-primary);border-radius:var(--radius-sm);padding:10px 14px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text-primary);color:var(--bg);padding:11px 20px;border-radius:999px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+.toast.error{background:var(--critical);color:#fff;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(10,10,10,0.5);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;}
+.modal{background:var(--surface);border-radius:var(--radius);padding:24px;max-width:360px;width:100%;box-shadow:var(--shadow);text-align:center;}
+.modal.wide{max-width:560px;text-align:right;max-height:85vh;overflow-y:auto;}
+.modal h2{font-size:17px;margin-bottom:6px;}
+.modal p.hint{color:var(--text-secondary);font-size:13.5px;margin-bottom:16px;}
+.modal .error-text{color:var(--critical);font-size:13px;margin-top:8px;min-height:16px;}
+
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.pill-btn{border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;}
+.pill-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pill-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.stat-tile{background:var(--surface-2);border-radius:var(--radius-sm);padding:11px 13px;border:1px solid var(--border);}
+.stat-tile .lbl{font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.stat-tile .val{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;}
+.stat-tile .sub{font-size:11.5px;color:var(--text-muted);margin-top:3px;font-variant-numeric:tabular-nums;}
+.series-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-sm);}
+table.data-table{width:100%;border-collapse:collapse;font-size:13.5px;white-space:nowrap;}
+table.data-table th{background:var(--surface-2);text-align:right;padding:9px 12px;font-size:11.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.03em;position:sticky;top:0;}
+table.data-table td{padding:9px 12px;border-top:1px solid var(--border);font-variant-numeric:tabular-nums;}
+table.data-table tbody tr:hover{background:var(--surface-2);cursor:pointer;}
+
+.checkbox-pills{display:flex;flex-wrap:wrap;gap:8px;}
+.check-pill{display:flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 13px 6px 10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-secondary);}
+.check-pill input{accent-color:var(--accent);}
+.check-pill.checked{border-color:var(--accent);color:var(--text-primary);background:var(--accent-soft);}
+.check-pill.disabled{opacity:0.4;cursor:not-allowed;}
+
+.chart-card{padding:16px 10px 10px;}
+.chart-legend{display:flex;flex-wrap:wrap;gap:14px;padding:0 10px 4px;}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-secondary);font-weight:600;}
+.legend-swatch{width:14px;height:3px;border-radius:2px;}
+.chart-svg-wrap{position:relative;}
+.chart-svg-wrap svg{display:block;width:100%;height:auto;}
+.chart-tooltip{position:absolute;pointer-events:none;background:var(--text-primary);color:var(--bg);padding:7px 10px;border-radius:8px;font-size:12px;line-height:1.5;box-shadow:var(--shadow);transform:translate(-50%,-110%);white-space:nowrap;opacity:0;transition:opacity .1s;z-index:5;}
+.chart-tooltip.show{opacity:1;}
+.chart-tooltip .tt-date{font-weight:700;font-family:'Space Mono',monospace;font-size:11px;margin-bottom:3px;}
+.chart-tooltip .tt-row{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;}
+
+.empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13.5px;}
+.coverage-badge{font-size:12.5px;color:var(--text-secondary);background:var(--surface-2);border-radius:999px;padding:5px 12px;font-weight:600;}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:13.5px;}
+.detail-grid .dgrp{grid-column:1/-1;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--text-muted);margin-top:10px;margin-bottom:2px;}
+.detail-grid .drow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);}
+.detail-grid .drow span:last-child{font-family:'Space Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600;}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-inline-end-color:transparent;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media (max-width:380px){
+  .container{padding-left:10px;padding-right:10px;}
+  .card{padding:13px;}
+  .flat-fields{grid-template-columns:repeat(auto-fit,minmax(96px,1fr));}
+  .stat-row{grid-template-columns:repeat(auto-fit,minmax(108px,1fr));}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function(){
+"use strict";
+
+var FLOORS=[{key:"f0",label:"קומה 0"},{key:"f7",label:"קומה 7"},{key:"f14",label:"קומה 14"}];
+var WAREHOUSES=[{key:"w1",label:"מחסן 1"},{key:"w2",label:"מחסן 2"},{key:"w3",label:"מחסן 3"}];
+var HEAT_ZONES=[{key:"north",label:"צפון"},{key:"south",label:"דרום"},{key:"center",label:"מרכז"}];
+var AIR_FLOW=[{key:"intake",label:"כניסת אוויר"},{key:"outtake",label:"יציאת אוויר"}];
+
+var CATEGORIES=[
+  {key:"t0800",label:"טמפרטורה 08:00",unit:"°C",kind:"grid",rows:FLOORS,cols:WAREHOUSES},
+  {key:"t1500",label:"טמפרטורה 15:00",unit:"°C",kind:"grid",rows:FLOORS,cols:WAREHOUSES},
+  {key:"water",label:"צריכת מים",unit:"מ״ק",kind:"flat",items:[{key:"general",label:"מונה כללי"},{key:"tower",label:"מונה מגדל"}]},
+  {key:"heat0800",label:"חימום תת רצפתי 08:00",unit:"°C",kind:"grid",rows:AIR_FLOW,cols:HEAT_ZONES},
+  {key:"heat1500",label:"חימום תת רצפתי 15:00",unit:"°C",kind:"grid",rows:AIR_FLOW,cols:HEAT_ZONES}
+];
+
+var SERIES_COLORS=["var(--series-1)","var(--series-2)","var(--series-3)"];
+var MAX_SERIES=3;
+
+function byId(id){return document.getElementById(id);}
+function root(){return byId("root");}
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+function getPath(obj,path){
+  var o=obj;
+  for(var i=0;i<path.length;i++){ if(o==null) return undefined; o=o[path[i]]; }
+  return o;
+}
+function setPath(obj,path,value){
+  var o=obj;
+  for(var i=0;i<path.length-1;i++){ var k=path[i]; if(o[k]==null) o[k]={}; o=o[k]; }
+  o[path[path.length-1]]=value;
+}
+function categoryLeaves(cat){
+  if(cat.kind==="grid"){
+    var leaves=[];
+    cat.rows.forEach(function(r){
+      cat.cols.forEach(function(c){
+        leaves.push({key:r.key+"_"+c.key,label:r.label+" · "+c.label,path:[cat.key,r.key,c.key]});
+      });
+    });
+    return leaves;
+  }
+  return cat.items.map(function(it){ return {key:it.key,label:it.label,path:[cat.key,it.key]}; });
+}
+function catByKey(key){ for(var i=0;i<CATEGORIES.length;i++){ if(CATEGORIES[i].key===key) return CATEGORIES[i]; } return null; }
+function parseNumOrNull(str){
+  if(str==null) return null;
+  str=String(str).trim();
+  if(str==="") return null;
+  var n=parseFloat(str);
+  return isNaN(n)?null:n;
+}
+function fmtNum(n){
+  if(n==null || isNaN(n)) return "—";
+  return (Math.round(n*10)/10).toLocaleString("he-IL");
+}
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function fmtDateShort(iso){
+  var p=iso.split("-");
+  return p[2]+"."+p[1];
+}
+function daysAgo(n){
+  var d=new Date();
+  d.setDate(d.getDate()-n);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function inspectorName(){ return localStorage.getItem("inspectorName")||""; }
+function setInspectorName(v){ localStorage.setItem("inspectorName",v); }
+function cachedPin(){ return sessionStorage.getItem("mgrPin")||""; }
+function setCachedPin(v){ sessionStorage.setItem("mgrPin",v); }
+function clearCachedPin(){ sessionStorage.removeItem("mgrPin"); }
+
+var UI={
+  tab:"report",
+  mgrUnlocked:false,
+  pinError:false,
+  pinChecking:false,
+  mgrSubTab:"reports",
+  reportsRange:"30",
+  reportsInspector:"all",
+  detailReportId:null,
+  confirmDeleteId:null,
+  trendCatKey:CATEGORIES[0].key,
+  trendSelected:[],
+  trendRange:"30",
+  trendShowTable:false,
+  submitting:false,
+  deleting:false,
+  nameModalOpen:false,
+  selectedDate:null,
+  myReport:null,
+  myReportLoading:false,
+  managerReports:null,
+  managerLoading:false
+};
+
+var toastTimer=null;
+function ensureToastEl(){
+  var t=document.getElementById("global-toast");
+  if(!t){ t=document.createElement("div"); t.id="global-toast"; document.body.appendChild(t); }
+  return t;
+}
+function showToast(msg,kind){
+  var t=ensureToastEl();
+  t.textContent=msg;
+  t.className="toast"+(kind==="error"?" error":"");
+  requestAnimationFrame(function(){ t.classList.add("show"); });
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ t.classList.remove("show"); },2600);
+}
+
+async function apiFetch(url,opts){
+  var r=await fetch(url,opts);
+  var data=null;
+  try{ data=await r.json(); }catch(e){}
+  if(!r.ok){
+    var e=new Error((data&&data.error)||"request_failed");
+    e.code=(data&&data.error)||"request_failed";
+    e.status=r.status;
+    throw e;
+  }
+  return data;
+}
+
+async function fetchMyReport(date,inspector){
+  if(!date||!inspector) return null;
+  UI.myReportLoading=true; renderApp();
+  try{
+    var data=await apiFetch("/api/reports?inspector="+encodeURIComponent(inspector)+"&date="+encodeURIComponent(date));
+    UI.myReport=data.report;
+  }catch(err){
+    UI.myReport=null;
+  }
+  UI.myReportLoading=false;
+  renderApp();
+}
+
+async function fetchManagerReports(pin){
+  UI.managerLoading=true; renderApp();
+  try{
+    var data=await apiFetch("/api/reports?pin="+encodeURIComponent(pin));
+    UI.managerReports=data.reports;
+    UI.managerLoading=false;
+    return true;
+  }catch(err){
+    UI.managerLoading=false;
+    if(err.status===403){ clearCachedPin(); UI.mgrUnlocked=false; }
+    showToast(err.code==="bad_pin"?"קוד שגוי":"טעינת הנתונים נכשלה","error");
+    return false;
+  }
+}
+
+async function submitReport(report,btn){
+  UI.submitting=true;
+  var originalText=btn?btn.textContent:null;
+  if(btn){ btn.disabled=true; btn.textContent="שולח…"; }
+  try{
+    var data=await apiFetch("/api/reports",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(report)
+    });
+    UI.submitting=false;
+    UI.myReport=data.report;
+    if(btn){ btn.disabled=false; btn.textContent=originalText; }
+    showToast("הדיווח נשמר בהצלחה");
+    renderApp();
+  }catch(err){
+    UI.submitting=false;
+    if(btn){ btn.disabled=false; btn.textContent=originalText; }
+    showToast("השמירה נכשלה, נסה שוב","error");
+  }
+}
+
+async function deleteReport(id){
+  if(UI.deleting) return;
+  UI.deleting=true;
+  var btn=root().querySelector('[data-action="confirm-delete"]');
+  var originalText=btn?btn.textContent:null;
+  if(btn){ btn.disabled=true; btn.textContent="מוחק…"; }
+  try{
+    await apiFetch("/api/reports?id="+encodeURIComponent(id)+"&pin="+encodeURIComponent(cachedPin()),{method:"DELETE"});
+    UI.deleting=false;
+    UI.detailReportId=null;
+    UI.confirmDeleteId=null;
+    if(UI.managerReports) UI.managerReports=UI.managerReports.filter(function(r){ return r.id!==id; });
+    showToast("הדיווח נמחק");
+    renderApp();
+  }catch(err){
+    UI.deleting=false;
+    if(btn){ btn.disabled=false; btn.textContent=originalText; }
+    showToast("המחיקה נכשלה, נסה שוב","error");
+  }
+}
+
+function handleReportSubmit(e){
+  e.preventDefault();
+  if(UI.submitting) return;
+  var date=byId("f-date").value;
+  var inspector=byId("f-inspector").value.trim();
+  if(!date||!inspector){ showToast("נא למלא תאריך ושם בודק","error"); return; }
+  setInspectorName(inspector);
+  var report={date:date,inspector:inspector};
+  CATEGORIES.forEach(function(cat){
+    categoryLeaves(cat).forEach(function(leaf){
+      var input=root().querySelector('[data-path="'+leaf.path.join(".")+'"]');
+      setPath(report,leaf.path,input?parseNumOrNull(input.value):null);
+    });
+  });
+  var btn=root().querySelector('#report-form button[type=submit]');
+  submitReport(report,btn);
+}
+
+function renderHeader(){
+  var name=inspectorName()||"אורח";
+  return ''+
+  '<div class="app-header"><div class="app-header-inner">'+
+    '<div class="app-title">יומן ניטור מחסנים<small>דוח יומי · טמפרטורה, מים וחימום</small></div>'+
+    '<div class="tabs">'+
+      '<button class="tab-btn'+(UI.tab==="report"?" active":"")+'" data-action="tab" data-tab="report">דיווח יומי</button>'+
+      '<button class="tab-btn'+(UI.tab==="manager"?" active":"")+'" data-action="tab" data-tab="manager">מנהל</button>'+
+    '</div>'+
+    '<div class="user-chip" data-action="edit-name" title="שינוי שם"><span class="dot"></span>'+esc(name)+'</div>'+
+  '</div></div>';
+}
+
+function renderReportForm(){
+  if(!UI.selectedDate) UI.selectedDate=todayStr();
+  var date=UI.selectedDate;
+  var name=inspectorName();
+  var source=UI.myReport;
+  var isEdit=!!source;
+
+  var html='<div class="container">';
+  if(isEdit){
+    html+='<div class="banner"><span>כבר קיים דיווח שלך לתאריך זה — שליחה תעדכן אותו.</span></div>';
+  }
+
+  html+='<form id="report-form"><div class="card section-stack">';
+  html+='<div class="field-row">';
+  html+='<div class="field"><label>תאריך</label><input type="date" id="f-date" value="'+esc(date)+'" data-action="date-change"></div>';
+  html+='<div class="field"><label>בודק</label><input type="text" id="f-inspector" placeholder="שם מלא" value="'+esc(name)+'"></div>';
+  html+='</div></div>';
+
+  CATEGORIES.forEach(function(cat){
+    html+='<div class="card">';
+    html+='<div class="section-title">'+esc(cat.label)+'<span class="unit">('+esc(cat.unit)+')</span></div>';
+    if(cat.kind==="grid"){
+      html+='<table class="grid-table"><thead><tr><th></th>';
+      cat.cols.forEach(function(c){ html+='<th>'+esc(c.label)+'</th>'; });
+      html+='</tr></thead><tbody>';
+      cat.rows.forEach(function(r){
+        html+='<tr><td>'+esc(r.label)+'</td>';
+        cat.cols.forEach(function(c){
+          var path=[cat.key,r.key,c.key];
+          var val=source?getPath(source,path):null;
+          html+='<td><input class="num-input" type="number" step="0.1" inputmode="decimal" data-path="'+path.join(".")+'" value="'+(val==null?"":val)+'" placeholder="—"></td>';
+        });
+        html+='</tr>';
+      });
+      html+='</tbody></table>';
+    }else{
+      html+='<div class="flat-fields">';
+      cat.items.forEach(function(it){
+        var path=[cat.key,it.key];
+        var val=source?getPath(source,path):null;
+        html+='<div class="flat-field"><label>'+esc(it.label)+'</label><input class="num-input" type="number" step="0.1" inputmode="decimal" data-path="'+path.join(".")+'" value="'+(val==null?"":val)+'" placeholder="—"></div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+
+  html+='<button type="submit" class="btn btn-primary">'+(isEdit?"עדכון דיווח":"שליחת דיווח")+'</button>';
+  html+='</form></div>';
+  return html;
+}
+
+function computeCoverage(reports,fromDate){
+  var days=new Set(reports.map(function(r){ return r.date; }));
+  var total=0,covered=0;
+  var d=new Date(fromDate);
+  var end=new Date();
+  while(d<=end){
+    total++;
+    var iso=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    if(days.has(iso)) covered++;
+    d.setDate(d.getDate()+1);
+  }
+  return {covered:covered,total:total};
+}
+
+function filteredReports(range,inspector){
+  var all=UI.managerReports||[];
+  var from=range==="all"?"0000-00-00":daysAgo(parseInt(range,10)-1);
+  return all.filter(function(r){
+    if(r.date<from) return false;
+    if(inspector!=="all" && r.inspector!==inspector) return false;
+    return true;
+  }).sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:0; });
+}
+
+function distinctInspectors(){
+  var s=new Set((UI.managerReports||[]).map(function(r){ return r.inspector; }));
+  return Array.from(s).sort();
+}
+
+function renderPinGate(){
+  return '<div class="container"><div class="card" style="max-width:340px;margin:40px auto;text-align:center;">'+
+    '<h2 style="margin-bottom:6px;">כניסת מנהל</h2>'+
+    '<p class="hint">הזן קוד גישה לצפייה בכל הדיווחים ובמגמות</p>'+
+    '<form id="pin-form"><input type="password" inputmode="numeric" id="pin-input" placeholder="קוד גישה" style="text-align:center;border:1px solid var(--border);border-radius:8px;padding:10px;width:100%;font-size:15px;margin-bottom:10px;background:var(--surface-2);color:var(--text-primary);">'+
+    '<button type="submit" class="btn btn-primary" '+(UI.pinChecking?"disabled":"")+'>'+(UI.pinChecking?"בודק…":"כניסה")+'</button>'+
+    (UI.pinError?'<div class="error-text">קוד שגוי, נסה שוב</div>':'')+
+    '</form></div></div>';
+}
+
+function renderReportsTab(){
+  var reports=filteredReports(UI.reportsRange,UI.reportsInspector);
+  var from=UI.reportsRange==="all"?(reports.length?reports[reports.length-1].date:todayStr()):daysAgo(parseInt(UI.reportsRange,10)-1);
+  var cov=computeCoverage(UI.managerReports||[],from);
+  var inspectors=distinctInspectors();
+
+  var html='<div class="container wide">';
+  html+='<div class="filter-row">';
+  ["7","30","90","all"].forEach(function(r){
+    html+='<button class="pill-btn'+(UI.reportsRange===r?" active":"")+'" data-action="reports-range" data-range="'+r+'">'+(r==="all"?"הכל":r+" ימים")+'</button>';
+  });
+  html+='<select id="reports-inspector-select" class="pill-btn" style="cursor:pointer;">';
+  html+='<option value="all"'+(UI.reportsInspector==="all"?" selected":"")+'>כל הבודקים</option>';
+  inspectors.forEach(function(i){ html+='<option value="'+esc(i)+'"'+(UI.reportsInspector===i?" selected":"")+'>'+esc(i)+'</option>'; });
+  html+='</select>';
+  html+='<button class="pill-btn" data-action="refresh-manager">רענון</button>';
+  html+='<span class="coverage-badge" style="margin-inline-start:auto;">כיסוי דיווחים: '+cov.covered+'/'+cov.total+' ימים</span>';
+  html+='</div>';
+
+  if(!reports.length){
+    html+='<div class="card"><div class="empty-state">אין דיווחים בטווח שנבחר</div></div>';
+  }else{
+    html+='<div class="table-wrap"><table class="data-table"><thead><tr><th>תאריך</th><th>בודק</th><th>נשלח בשעה</th></tr></thead><tbody>';
+    reports.forEach(function(r){
+      var t=new Date(r.submittedAt);
+      var timeStr=String(t.getHours()).padStart(2,"0")+":"+String(t.getMinutes()).padStart(2,"0");
+      html+='<tr data-action="open-detail" data-id="'+esc(r.id)+'"><td>'+esc(r.date)+'</td><td>'+esc(r.inspector)+'</td><td>'+timeStr+'</td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function renderDetailModal(){
+  var r=(UI.managerReports||[]).find(function(x){ return x.id===UI.detailReportId; });
+  if(!r) return "";
+  var html='<div class="modal-overlay" id="detail-overlay"><div class="modal wide">';
+  html+='<h2>'+esc(r.date)+' · '+esc(r.inspector)+'</h2>';
+  html+='<div class="detail-grid">';
+  CATEGORIES.forEach(function(cat){
+    html+='<div class="dgrp">'+esc(cat.label)+'</div>';
+    if(cat.kind==="grid"){
+      html+='<div style="grid-column:1/-1;margin-bottom:6px;"><table class="grid-table"><thead><tr><th></th>';
+      cat.rows.forEach(function(rw){ html+='<th>'+esc(rw.label)+'</th>'; });
+      html+='</tr></thead><tbody>';
+      cat.cols.forEach(function(c){
+        html+='<tr><td>'+esc(c.label)+'</td>';
+        cat.rows.forEach(function(rw){
+          var v=getPath(r,[cat.key,rw.key,c.key]);
+          html+='<td style="text-align:center;font-family:\'Space Mono\',monospace;font-variant-numeric:tabular-nums;">'+(v==null?"—":fmtNum(v)+" "+cat.unit)+'</td>';
+        });
+        html+='</tr>';
+      });
+      html+='</tbody></table></div>';
+    }else{
+      categoryLeaves(cat).forEach(function(leaf){
+        var v=getPath(r,leaf.path);
+        html+='<div class="drow"><span>'+esc(leaf.label)+'</span><span>'+(v==null?"—":fmtNum(v)+" "+cat.unit)+'</span></div>';
+      });
+    }
+  });
+  html+='</div>';
+  if(UI.confirmDeleteId===r.id){
+    html+='<div class="banner" style="margin-top:16px;background:rgba(192,57,43,0.1);border-color:var(--critical);">';
+    html+='<span>למחוק לצמיתות את הדיווח של '+esc(r.inspector)+' מתאריך '+esc(r.date)+'? לא ניתן לשחזר.</span>';
+    html+='</div>';
+    html+='<div style="display:flex;gap:8px;">';
+    html+='<button class="btn btn-secondary" style="flex:1;" data-action="cancel-delete">ביטול</button>';
+    html+='<button class="btn" style="flex:1;background:var(--critical);color:#fff;" data-action="confirm-delete" data-id="'+esc(r.id)+'">כן, למחוק</button>';
+    html+='</div>';
+  }else{
+    html+='<div style="display:flex;gap:8px;margin-top:16px;">';
+    html+='<button class="btn btn-secondary" style="flex:1;" data-action="close-detail">סגירה</button>';
+    html+='<button class="btn" style="flex:1;background:var(--critical);color:#fff;" data-action="ask-delete" data-id="'+esc(r.id)+'">מחיקת דיווח</button>';
+    html+='</div>';
+  }
+  html+='</div></div>';
+  return html;
+}
+
+function trendLeaves(){ return categoryLeaves(catByKey(UI.trendCatKey)); }
+
+function buildSeriesData(){
+  var cat=catByKey(UI.trendCatKey);
+  var leaves=trendLeaves();
+  var selected=leaves.filter(function(l){ return UI.trendSelected.indexOf(l.key)!==-1; });
+  var from=UI.trendRange==="all"?"0000-00-00":daysAgo(parseInt(UI.trendRange,10)-1);
+  var byDate={};
+  (UI.managerReports||[]).forEach(function(r){
+    if(r.date<from) return;
+    if(!byDate[r.date] || byDate[r.date].submittedAt<r.submittedAt) byDate[r.date]=r;
+  });
+  var dates=Object.keys(byDate).sort();
+  var series=selected.map(function(leaf,idx){
+    var points=dates.map(function(d){
+      var v=getPath(byDate[d],leaf.path);
+      return {date:d,value:(v==null?null:v)};
+    });
+    return {leaf:leaf,color:SERIES_COLORS[idx],points:points};
+  });
+  return {cat:cat,dates:dates,series:series};
+}
+
+function seriesStats(points){
+  var vals=points.map(function(p){ return p.value; }).filter(function(v){ return v!=null; });
+  if(!vals.length) return null;
+  var last=vals[vals.length-1];
+  var prev=vals.length>1?vals[vals.length-2]:null;
+  var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals);
+  var avg=vals.reduce(function(a,b){ return a+b; },0)/vals.length;
+  var delta=prev==null?null:last-prev;
+  return {last:last,min:min,max:max,avg:avg,delta:delta,count:vals.length};
+}
+
+function buildLineChartSVG(data){
+  var W=640,H=260,padL=42,padR=14,padT=14,padB=28;
+  var plotW=W-padL-padR,plotH=H-padT-padB;
+  var allVals=[];
+  data.series.forEach(function(s){ s.points.forEach(function(p){ if(p.value!=null) allVals.push(p.value); }); });
+  if(!allVals.length) return null;
+  var min=Math.min.apply(null,allVals),max=Math.max.apply(null,allVals);
+  if(min===max){ min-=1; max+=1; }
+  var pad=(max-min)*0.12;
+  min-=pad; max+=pad;
+  var n=data.dates.length;
+  function xAt(i){ return n<=1?padL+plotW/2:padL+(plotW*i/(n-1)); }
+  function yAt(v){ return padT+plotH-((v-min)/(max-min))*plotH; }
+
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img">';
+  var ticks=4;
+  for(var t=0;t<=ticks;t++){
+    var val=min+(max-min)*t/ticks;
+    var y=yAt(val);
+    svg+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--gridline)" stroke-width="1"/>';
+    svg+='<text x="'+(padL-6)+'" y="'+(y+3)+'" text-anchor="end" font-size="10" fill="var(--text-muted)" font-family="Space Mono,monospace">'+fmtNum(val)+'</text>';
+  }
+  var step=Math.max(1,Math.ceil(n/6));
+  data.dates.forEach(function(d,i){
+    if(i%step!==0 && i!==n-1) return;
+    svg+='<text x="'+xAt(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-family=\'Space Mono,monospace\'>'+fmtDateShort(d)+'</text>';
+  });
+
+  data.series.forEach(function(s){
+    var segs=[],cur=[];
+    s.points.forEach(function(p,i){
+      if(p.value==null){ if(cur.length){ segs.push(cur); cur=[]; } return; }
+      cur.push([xAt(i),yAt(p.value)]);
+    });
+    if(cur.length) segs.push(cur);
+    segs.forEach(function(seg){
+      var d="M"+seg.map(function(pt){ return pt[0].toFixed(1)+","+pt[1].toFixed(1); }).join(" L");
+      svg+='<path d="'+d+'" fill="none" stroke="'+s.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    });
+    s.points.forEach(function(p,i){
+      if(p.value==null) return;
+      svg+='<circle cx="'+xAt(i)+'" cy="'+yAt(p.value)+'" r="2.5" fill="'+s.color+'"/>';
+    });
+  });
+
+  svg+='<g id="hover-group" style="display:none;">';
+  svg+='<line id="hover-line" x1="0" y1="'+padT+'" x2="0" y2="'+(H-padB)+'" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="3,3"/>';
+  svg+='</g>';
+  svg+='<rect id="hover-capture" x="'+padL+'" y="'+padT+'" width="'+plotW+'" height="'+plotH+'" fill="transparent"/>';
+  svg+='</svg>';
+
+  return {svg:svg,meta:{padL:padL,plotW:plotW,n:n,W:W,H:H}};
+}
+
+function renderTrendsTab(){
+  var cat=catByKey(UI.trendCatKey);
+  var leaves=trendLeaves();
+  if(UI.trendSelected.length===0 && leaves.length){ UI.trendSelected=[leaves[0].key]; }
+  var data=buildSeriesData();
+
+  var html='<div class="container wide">';
+  html+='<div class="card" style="margin-bottom:14px;">';
+  html+='<div class="section-title">קטגוריה</div>';
+  html+='<select id="trend-cat-select" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:14.5px;background:var(--surface);color:var(--text-primary);margin-bottom:14px;">';
+  CATEGORIES.forEach(function(c){ html+='<option value="'+c.key+'"'+(c.key===UI.trendCatKey?" selected":"")+'>'+esc(c.label)+'</option>'; });
+  html+='</select>';
+  html+='<div class="section-title">מיקום להשוואה <span class="unit">(עד '+MAX_SERIES+')</span></div>';
+  html+='<div class="checkbox-pills">';
+  leaves.forEach(function(l){
+    var checked=UI.trendSelected.indexOf(l.key)!==-1;
+    var disabled=!checked && UI.trendSelected.length>=MAX_SERIES;
+    html+='<label class="check-pill'+(checked?" checked":"")+(disabled?" disabled":"")+'"><input type="checkbox" data-action="trend-toggle" data-leaf="'+esc(l.key)+'" '+(checked?"checked":"")+' '+(disabled?"disabled":"")+'>'+esc(l.label)+'</label>';
+  });
+  html+='</div></div>';
+
+  html+='<div class="filter-row">';
+  ["7","30","90","all"].forEach(function(r){
+    html+='<button class="pill-btn'+(UI.trendRange===r?" active":"")+'" data-action="trend-range" data-range="'+r+'">'+(r==="all"?"הכל":r+" ימים")+'</button>';
+  });
+  html+='<button class="pill-btn" data-action="refresh-manager">רענון</button>';
+  html+='<button class="pill-btn'+(UI.trendShowTable?" active":"")+'" data-action="toggle-trend-table" style="margin-inline-start:auto;">הצג כטבלה</button>';
+  html+='</div>';
+
+  if(!data.series.length || !data.dates.length){
+    html+='<div class="card"><div class="empty-state">אין מספיק נתונים להצגת מגמה עבור הבחירה הנוכחית</div></div></div>';
+    return html;
+  }
+
+  html+='<div class="stat-row">';
+  data.series.forEach(function(s){
+    var st=seriesStats(s.points);
+    html+='<div class="stat-tile"><div class="lbl"><span class="series-dot" style="background:'+s.color+'"></span>'+esc(s.leaf.label)+'</div>';
+    if(!st){ html+='<div class="val">—</div>'; }
+    else{
+      var arrow=st.delta==null?"":(st.delta>0?" ▲":(st.delta<0?" ▼":" –"));
+      html+='<div class="val">'+fmtNum(st.last)+' '+esc(cat.unit)+'<span style="font-size:12px;color:var(--text-muted);">'+arrow+'</span></div>';
+      html+='<div class="sub">ממוצע '+fmtNum(st.avg)+' · טווח '+fmtNum(st.min)+'–'+fmtNum(st.max)+'</div>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+
+  if(UI.trendShowTable){
+    html+='<div class="table-wrap"><table class="data-table"><thead><tr><th>תאריך</th>';
+    data.series.forEach(function(s){ html+='<th>'+esc(s.leaf.label)+'</th>'; });
+    html+='</tr></thead><tbody>';
+    data.dates.forEach(function(d,i){
+      html+='<tr><td>'+esc(d)+'</td>';
+      data.series.forEach(function(s){ html+='<td>'+(s.points[i].value==null?"—":fmtNum(s.points[i].value)+" "+cat.unit)+'</td>'; });
+      html+='</tr>';
+    });
+    html+='</tbody></table></div></div>';
+    return html;
+  }
+
+  html+='<div class="card chart-card">';
+  html+='<div class="chart-legend">';
+  data.series.forEach(function(s){ html+='<div class="legend-item"><span class="legend-swatch" style="background:'+s.color+'"></span>'+esc(s.leaf.label)+'</div>'; });
+  html+='</div>';
+  var built=buildLineChartSVG(data);
+  html+='<div class="chart-svg-wrap" id="chart-wrap">'+(built?built.svg:'')+'<div class="chart-tooltip" id="chart-tooltip"></div></div>';
+  html+='</div></div>';
+
+  window.__chartData=data;
+  window.__chartMeta=built?built.meta:null;
+  return html;
+}
+
+function attachChartInteractivity(){
+  var wrap=byId("chart-wrap");
+  if(!wrap || !window.__chartMeta) return;
+  var svg=wrap.querySelector("svg");
+  var capture=byId("hover-capture");
+  var hoverGroup=byId("hover-group");
+  var hoverLine=byId("hover-line");
+  var tooltip=byId("chart-tooltip");
+  var meta=window.__chartMeta,data=window.__chartData;
+  if(!capture) return;
+
+  function move(clientX){
+    var rect=svg.getBoundingClientRect();
+    var scale=meta.W/rect.width;
+    var x=(clientX-rect.left)*scale;
+    var rel=(x-meta.padL)/meta.plotW;
+    var idx=Math.round(rel*(meta.n-1));
+    idx=Math.max(0,Math.min(meta.n-1,idx));
+    var xPos=meta.n<=1?meta.padL+meta.plotW/2:meta.padL+(meta.plotW*idx/(meta.n-1));
+    hoverGroup.style.display="block";
+    hoverLine.setAttribute("x1",xPos);
+    hoverLine.setAttribute("x2",xPos);
+    var date=data.dates[idx];
+    var tt='<div class="tt-date">'+esc(date)+'</div>';
+    data.series.forEach(function(s){
+      var v=s.points[idx].value;
+      tt+='<div class="tt-row"><span class="series-dot" style="background:'+s.color+'"></span>'+esc(s.leaf.label)+': '+(v==null?"—":fmtNum(v))+'</div>';
+    });
+    tooltip.innerHTML=tt;
+    tooltip.classList.add("show");
+    tooltip.style.left=(xPos/meta.W*100)+"%";
+    tooltip.style.top="10px";
+  }
+  function leave(){ hoverGroup.style.display="none"; tooltip.classList.remove("show"); }
+  capture.addEventListener("mousemove",function(e){ move(e.clientX); });
+  capture.addEventListener("mouseleave",leave);
+  capture.addEventListener("touchmove",function(e){ if(e.touches[0]) move(e.touches[0].clientX); },{passive:true});
+  capture.addEventListener("touchend",leave);
+}
+
+function renderManagerTab(){
+  if(!UI.mgrUnlocked) return renderPinGate();
+  if(UI.managerReports===null){
+    return '<div class="container wide"><div class="card"><div class="empty-state"><span class="spinner"></span> טוען נתונים…</div></div></div>';
+  }
+  var html='<div class="container wide" style="padding-top:6px;">';
+  html+='<div class="filter-row" style="margin-bottom:10px;">';
+  html+='<button class="pill-btn'+(UI.mgrSubTab==="reports"?" active":"")+'" data-action="mgr-subtab" data-sub="reports">כל הדיווחים</button>';
+  html+='<button class="pill-btn'+(UI.mgrSubTab==="trends"?" active":"")+'" data-action="mgr-subtab" data-sub="trends">מגמות</button>';
+  html+='</div></div>';
+  html+= UI.mgrSubTab==="reports" ? renderReportsTab() : renderTrendsTab();
+  if(UI.detailReportId) html+=renderDetailModal();
+  return html;
+}
+
+function renderNameModal(){
+  var current=inspectorName();
+  var isEdit=!!current;
+  return '<div class="modal-overlay" id="name-overlay"><div class="modal">'+
+    '<h2>'+(isEdit?"שינוי שם":"ברוכים הבאים")+'</h2>'+
+    '<p class="hint">מה השם שלך? זה ישמש לזיהוי הדיווחים שלך</p>'+
+    '<form id="name-form"><input type="text" id="name-input" placeholder="שם מלא" value="'+esc(current)+'" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:14.5px;margin-bottom:10px;background:var(--surface-2);color:var(--text-primary);text-align:center;">'+
+    '<button type="submit" class="btn btn-primary">המשך</button>'+
+    (isEdit?'<button type="button" class="btn btn-ghost" data-action="cancel-name" style="width:100%;margin-top:6px;">ביטול</button>':'')+
+    '</form></div></div>';
+}
+
+function renderApp(){
+  var name=inspectorName();
+  var html="";
+  if(!name && !UI.nameModalOpen){ UI.nameModalOpen=true; }
+  html+=renderHeader();
+  html+= UI.tab==="report" ? renderReportForm() : renderManagerTab();
+  if(!name || UI.nameModalOpen) html+=renderNameModal();
+  root().innerHTML=html;
+  if(UI.tab==="manager" && UI.mgrSubTab==="trends" && UI.mgrUnlocked && !UI.trendShowTable){
+    attachChartInteractivity();
+  }
+  attachEvents();
+}
+
+function attachEvents(){
+  var reportForm=byId("report-form");
+  if(reportForm) reportForm.addEventListener("submit",handleReportSubmit);
+
+  var dateInput=byId("f-date");
+  if(dateInput) dateInput.addEventListener("change",function(){
+    UI.selectedDate=dateInput.value;
+    UI.myReport=null;
+    fetchMyReport(UI.selectedDate,inspectorName());
+  });
+
+  var pinForm=byId("pin-form");
+  if(pinForm) pinForm.addEventListener("submit",async function(e){
+    e.preventDefault();
+    var v=byId("pin-input").value;
+    UI.pinChecking=true; UI.pinError=false; renderApp();
+    var ok=await fetchManagerReports(v);
+    UI.pinChecking=false;
+    if(ok){ UI.mgrUnlocked=true; setCachedPin(v); }
+    else{ UI.pinError=true; }
+    renderApp();
+  });
+
+  var nameForm=byId("name-form");
+  if(nameForm) nameForm.addEventListener("submit",function(e){
+    e.preventDefault();
+    var v=byId("name-input").value.trim();
+    if(!v) return;
+    setInspectorName(v);
+    UI.nameModalOpen=false;
+    UI.myReport=null;
+    if(!UI.selectedDate) UI.selectedDate=todayStr();
+    renderApp();
+    fetchMyReport(UI.selectedDate,v);
+  });
+
+  var reportsSel=byId("reports-inspector-select");
+  if(reportsSel) reportsSel.addEventListener("change",function(){ UI.reportsInspector=reportsSel.value; renderApp(); });
+
+  var trendCatSel=byId("trend-cat-select");
+  if(trendCatSel) trendCatSel.addEventListener("change",function(){ UI.trendCatKey=trendCatSel.value; UI.trendSelected=[]; renderApp(); });
+
+  var detailOverlay=byId("detail-overlay");
+  if(detailOverlay) detailOverlay.addEventListener("click",function(e){
+    if(e.target===detailOverlay){ UI.detailReportId=null; UI.confirmDeleteId=null; renderApp(); }
+  });
+
+  var nameOverlay=byId("name-overlay");
+  if(nameOverlay && inspectorName()) nameOverlay.addEventListener("click",function(e){
+    if(e.target===nameOverlay){ UI.nameModalOpen=false; renderApp(); }
+  });
+}
+
+function attachDelegatedEvents(){
+  var r=root();
+
+  r.addEventListener("click",function(e){
+    var el=e.target.closest("[data-action]");
+    if(!el) return;
+    var action=el.getAttribute("data-action");
+    if(action==="tab"){
+      UI.tab=el.getAttribute("data-tab");
+      renderApp();
+      if(UI.tab==="report" && inspectorName()){
+        if(!UI.selectedDate) UI.selectedDate=todayStr();
+        fetchMyReport(UI.selectedDate,inspectorName());
+      }
+    }else if(action==="edit-name"){
+      UI.nameModalOpen=true; renderApp();
+    }else if(action==="cancel-name"){
+      UI.nameModalOpen=false; renderApp();
+    }else if(action==="reports-range"){
+      UI.reportsRange=el.getAttribute("data-range"); renderApp();
+    }else if(action==="open-detail"){
+      UI.detailReportId=el.getAttribute("data-id"); UI.confirmDeleteId=null; renderApp();
+    }else if(action==="close-detail"){
+      UI.detailReportId=null; UI.confirmDeleteId=null; renderApp();
+    }else if(action==="ask-delete"){
+      UI.confirmDeleteId=el.getAttribute("data-id"); renderApp();
+    }else if(action==="cancel-delete"){
+      UI.confirmDeleteId=null; renderApp();
+    }else if(action==="confirm-delete"){
+      deleteReport(el.getAttribute("data-id"));
+    }else if(action==="mgr-subtab"){
+      UI.mgrSubTab=el.getAttribute("data-sub"); renderApp();
+    }else if(action==="trend-range"){
+      UI.trendRange=el.getAttribute("data-range"); renderApp();
+    }else if(action==="toggle-trend-table"){
+      UI.trendShowTable=!UI.trendShowTable; renderApp();
+    }else if(action==="refresh-manager"){
+      fetchManagerReports(cachedPin()).then(function(){ renderApp(); });
+    }
+  });
+
+  r.addEventListener("change",function(e){
+    var el=e.target.closest("[data-action='trend-toggle']");
+    if(!el) return;
+    var key=el.getAttribute("data-leaf");
+    var idx=UI.trendSelected.indexOf(key);
+    if(el.checked && idx===-1) UI.trendSelected.push(key);
+    else if(!el.checked && idx!==-1) UI.trendSelected.splice(idx,1);
+    renderApp();
+  });
+}
+
+function init(){
+  UI.selectedDate=todayStr();
+  attachDelegatedEvents();
+  renderApp();
+  var name=inspectorName();
+  if(name) fetchMyReport(UI.selectedDate,name);
+  var pin=cachedPin();
+  if(pin){
+    fetchManagerReports(pin).then(function(ok){
+      if(ok){ UI.mgrUnlocked=true; renderApp(); }
+    });
+  }
+}
+
+init();
+})();
+</script>
+</body>
+</html>
+
