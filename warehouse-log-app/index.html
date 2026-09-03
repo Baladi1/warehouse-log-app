@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
@@ -229,7 +229,6 @@ var CATEGORIES=[
 ];
 
 var SERIES_COLORS=["var(--series-1)","var(--series-2)","var(--series-3)"];
-var MAX_SERIES=3;
 
 function byId(id){return document.getElementById(id);}
 function root(){return byId("root");}
@@ -636,7 +635,7 @@ function buildSeriesData(){
       var v=getPath(byDate[d],leaf.path);
       return {date:d,value:(v==null?null:v)};
     });
-    return {leaf:leaf,color:SERIES_COLORS[idx],points:points};
+    return {leaf:leaf,color:SERIES_COLORS[idx%SERIES_COLORS.length],points:points};
   });
   return {cat:cat,dates:dates,series:series};
 }
@@ -718,12 +717,11 @@ function renderTrendsTab(){
   html+='<select id="trend-cat-select" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:14.5px;background:var(--surface);color:var(--text-primary);margin-bottom:14px;">';
   CATEGORIES.forEach(function(c){ html+='<option value="'+c.key+'"'+(c.key===UI.trendCatKey?" selected":"")+'>'+esc(c.label)+'</option>'; });
   html+='</select>';
-  html+='<div class="section-title">מיקום להשוואה <span class="unit">(עד '+MAX_SERIES+')</span></div>';
+  html+='<div class="section-title">מיקום להשוואה</div>';
   html+='<div class="checkbox-pills">';
   leaves.forEach(function(l){
     var checked=UI.trendSelected.indexOf(l.key)!==-1;
-    var disabled=!checked && UI.trendSelected.length>=MAX_SERIES;
-    html+='<label class="check-pill'+(checked?" checked":"")+(disabled?" disabled":"")+'"><input type="checkbox" data-action="trend-toggle" data-leaf="'+esc(l.key)+'" '+(checked?"checked":"")+' '+(disabled?"disabled":"")+'>'+esc(l.label)+'</label>';
+    html+='<label class="check-pill'+(checked?" checked":"")+'"><input type="checkbox" data-action="trend-toggle" data-leaf="'+esc(l.key)+'" '+(checked?"checked":"")+'>'+esc(l.label)+'</label>';
   });
   html+='</div></div>';
 
@@ -985,6 +983,4 @@ init();
 </script>
 </body>
 </html>
-
-
 
